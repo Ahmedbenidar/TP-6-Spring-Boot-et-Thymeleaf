@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: tete('Nouvelle inscription')}"></head>
+<body>
+<header th:replace="~{fragments :: entete}"></header>
+
+<main class="page page-etroite">
+    <section class="entete-page">
+        <div>
+            <h1>Nouvelle inscription</h1>
+            <p class="sous-titre">Renseignez le participant puis choisissez son atelier.</p>
+        </div>
+        <a class="lien-discret" th:href="@{/inscriptions}">Retour a la liste</a>
+    </section>
+
+    <div class="alerte-erreur" th:if="${erreurMetier}" th:text="${erreurMetier}">Erreur</div>
+
+    <form class="bloc formulaire" method="post" th:action="@{/inscriptions}" th:object="${participant}" novalidate>
+
+        <div class="alerte-erreur" th:if="${#fields.hasAnyErrors()}">
+            <strong>Le formulaire contient des erreurs, merci de corriger les champs signales.</strong>
+        </div>
+        <div class="ligne-champs">
+            <div class="champ">
+                <label for="prenom">Prenom</label>
+                <input type="text" id="prenom" th:field="*{prenom}" th:errorclass="champ-invalide">
+                <p class="erreur-champ" th:if="${#fields.hasErrors('prenom')}" th:errors="*{prenom}">Erreur</p>
+            </div>
+            <div class="champ">
+                <label for="nom">Nom</label>
+                <input type="text" id="nom" th:field="*{nom}" th:errorclass="champ-invalide">
+                <p class="erreur-champ" th:if="${#fields.hasErrors('nom')}" th:errors="*{nom}">Erreur</p>
+            </div>
+        </div>
+
+        <div class="champ">
+            <label for="email">Adresse email</label>
+            <input type="email" id="email" th:field="*{email}" th:errorclass="champ-invalide">
+            <p class="aide">Cette adresse identifie le participant : une seule inscription par email.</p>
+            <p class="erreur-champ" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Erreur</p>
+        </div>
+
+        <div class="ligne-champs">
+            <div class="champ">
+                <label for="etablissement">Etablissement</label>
+                <input type="text" id="etablissement" th:field="*{etablissement}" th:errorclass="champ-invalide">
+                <p class="erreur-champ" th:if="${#fields.hasErrors('etablissement')}" th:errors="*{etablissement}">Erreur</p>
+            </div>
+            <div class="champ">
+                <label for="telephone">Telephone</label>
+                <input type="tel" id="telephone" th:field="*{telephone}" th:errorclass="champ-invalide"
+                       placeholder="0612345678">
+                <p class="aide">10 chiffres, commencant par 05, 06 ou 07.</p>
+                <p class="erreur-champ" th:if="${#fields.hasErrors('telephone')}" th:errors="*{telephone}">Erreur</p>
+            </div>
+        </div>
+
+        <div class="champ">
+            <label for="atelier">Atelier</label>
+            <select id="atelier" th:field="*{atelier}" th:errorclass="champ-invalide">
+                <option value="">— Choisir un atelier —</option>
+                <option th:each="a : ${ateliers}"
+                        th:value="${a.id}"
+                        th:text="${a.code} + ' · ' + ${a.intitule} + ' (' + ${occupation[a.id]} + '/' + ${a.capacite} + ')'">Atelier</option>
+            </select>
+            <p class="aide">Le nombre de places restantes est indique entre parentheses.</p>
+            <p class="erreur-champ" th:if="${#fields.hasErrors('atelier')}" th:errors="*{atelier}">Erreur</p>
+        </div>
+
+        <div class="actions-formulaire">
+            <button type="submit" class="bouton-principal">Enregistrer l'inscription</button>
+            <a class="bouton-secondaire" th:href="@{/inscriptions}">Annuler</a>
+        </div>
+    </form>
+</main>
+
+<footer th:replace="~{fragments :: pied}"></footer>
+</body>
+</html>

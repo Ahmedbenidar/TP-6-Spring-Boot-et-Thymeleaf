@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: tete('Inscriptions')}"></head>
+<body>
+<header th:replace="~{fragments :: entete}"></header>
+
+<main class="page">
+    <section class="entete-page">
+        <div>
+            <h1>Inscriptions aux ateliers</h1>
+            <p class="sous-titre">
+                <span th:text="${#lists.size(inscriptions)}">0</span> inscription(s) affichee(s)
+                <span th:if="${atelierFiltre != null}">
+                    pour l'atelier <strong th:text="${atelierFiltre.code}">CODE</strong>
+                </span>
+            </p>
+        </div>
+        <a class="bouton-principal" th:href="@{/inscriptions/nouvelle}">Nouvelle inscription</a>
+    </section>
+
+    <div class="alerte-succes" th:if="${succes}" th:text="${succes}">Succes</div>
+
+    <section class="bloc">
+        <form class="barre-recherche" method="get" th:action="@{/inscriptions}">
+            <input type="search" name="terme" th:value="${terme}"
+                   placeholder="Nom, prenom, email ou etablissement">
+            <button type="submit" class="bouton-secondaire">Rechercher</button>
+            <a class="lien-discret" th:href="@{/inscriptions}"
+               th:if="${terme != null and !terme.isEmpty()}">Reinitialiser</a>
+        </form>
+
+        <div class="filtres">
+            <a th:each="a : ${ateliers}"
+               th:href="@{/inscriptions(atelierId=${a.id})}"
+               class="puce"
+               th:text="${a.code} + ' · ' + ${occupation[a.id]} + '/' + ${a.capacite}">CODE</a>
+        </div>
+
+        <table class="tableau">
+            <thead>
+            <tr>
+                <th>Participant</th>
+                <th>Email</th>
+                <th>Telephone</th>
+                <th>Etablissement</th>
+                <th>Atelier</th>
+                <th>Inscription</th>
+                <th class="colonne-droite">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${inscriptions}">
+                <td><strong th:text="${p.nomComplet}">Nom</strong></td>
+                <td th:text="${p.email}">email</td>
+                <td th:text="${p.telephone}">telephone</td>
+                <td th:text="${p.etablissement}">etablissement</td>
+                <td><span class="etiquette" th:text="${p.atelier.code}">CODE</span></td>
+                <td th:text="${#temporals.format(p.dateInscription, 'dd/MM/yyyy HH:mm')}">date</td>
+                <td class="colonne-droite">
+                    <form method="post" th:action="@{'/inscriptions/' + ${p.id} + '/supprimer'}"
+                          th:attr="data-nom=${p.nomComplet}" class="form-suppression">
+                        <button type="submit" class="bouton-danger">Annuler</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(inscriptions)}">
+                <td colspan="7" class="vide">Aucune inscription ne correspond a cette recherche.</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<footer th:replace="~{fragments :: pied}"></footer>
+<script>
+    document.querySelectorAll('form.form-suppression').forEach(function (formulaire) {
+        formulaire.addEventListener('submit', function (evenement) {
+            var nom = formulaire.getAttribute('data-nom') || 'ce participant';
+            if (!confirm("Annuler l'inscription de " + nom + " ?")) {
+                evenement.preventDefault();
+            }
+        });
+    });
+</script>
+</body>
+</html>

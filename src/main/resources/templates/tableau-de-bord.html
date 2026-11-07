@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: tete('Tableau de bord')}"></head>
+<body>
+<header th:replace="~{fragments :: entete}"></header>
+
+<main class="page">
+    <section class="entete-page">
+        <div>
+            <h1>Tableau de bord des ateliers</h1>
+            <p class="sous-titre">Suivi des inscriptions du MakerLab pour le semestre en cours.</p>
+        </div>
+        <a class="bouton-principal" th:href="@{/inscriptions/nouvelle}">Inscrire un participant</a>
+    </section>
+
+    <section class="indicateurs">
+        <article class="carte-indicateur">
+            <span class="indicateur-libelle">Inscriptions enregistrees</span>
+            <strong class="indicateur-valeur" th:text="${totalInscrits}">0</strong>
+        </article>
+        <article class="carte-indicateur">
+            <span class="indicateur-libelle">Ateliers programmes</span>
+            <strong class="indicateur-valeur" th:text="${#lists.size(ateliers)}">0</strong>
+        </article>
+        <article class="carte-indicateur">
+            <span class="indicateur-libelle">Places totales</span>
+            <strong class="indicateur-valeur"
+                    th:text="${ateliers.isEmpty()} ? 0 : ${#aggregates.sum(ateliers.![capacite])}">0</strong>
+        </article>
+        <article class="carte-indicateur">
+            <span class="indicateur-libelle">Etablissements representes</span>
+            <strong class="indicateur-valeur" th:text="${#lists.size(repartition)}">0</strong>
+        </article>
+    </section>
+
+    <section class="bloc">
+        <h2>Occupation des ateliers</h2>
+        <table class="tableau">
+            <thead>
+            <tr>
+                <th>Code</th>
+                <th>Intitule</th>
+                <th>Animateur</th>
+                <th>Seance</th>
+                <th class="colonne-droite">Inscrits</th>
+                <th class="colonne-droite">Places</th>
+                <th>Remplissage</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="atelier : ${ateliers}">
+                <td><span class="etiquette" th:text="${atelier.code}">CODE</span></td>
+                <td th:text="${atelier.intitule}">Intitule</td>
+                <td th:text="${atelier.animateur}">Animateur</td>
+                <td th:text="${#temporals.format(atelier.dateSeance, 'dd/MM/yyyy')}">01/01/2026</td>
+                <td class="colonne-droite" th:text="${occupation[atelier.id]}">0</td>
+                <td class="colonne-droite" th:text="${atelier.capacite}">0</td>
+                <td>
+                    <div class="jauge">
+                        <div class="jauge-remplie"
+                             th:style="'width:' + ${atelier.capacite == 0 ? 0 : (occupation[atelier.id] * 100 / atelier.capacite)} + '%'"></div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <div class="grille-deux">
+        <section class="bloc">
+            <h2>Repartition par etablissement</h2>
+            <ul class="liste-repartition">
+                <li th:each="ligne : ${repartition}">
+                    <span th:text="${ligne[0]}">Etablissement</span>
+                    <strong th:text="${ligne[1]}">0</strong>
+                </li>
+            </ul>
+            <p class="vide" th:if="${#lists.isEmpty(repartition)}">Aucune inscription pour le moment.</p>
+        </section>
+
+        <section class="bloc">
+            <h2>Dernieres inscriptions</h2>
+            <ul class="liste-recente">
+                <li th:each="p : ${dernieres}">
+                    <strong th:text="${p.nomComplet}">Nom</strong>
+                    <span class="discret" th:text="${p.atelier.intitule}">Atelier</span>
+                    <span class="discret" th:text="${#temporals.format(p.dateInscription, 'dd/MM/yyyy HH:mm')}">date</span>
+                </li>
+            </ul>
+            <p class="vide" th:if="${#lists.isEmpty(dernieres)}">Aucune inscription pour le moment.</p>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments :: pied}"></footer>
+</body>
+</html>

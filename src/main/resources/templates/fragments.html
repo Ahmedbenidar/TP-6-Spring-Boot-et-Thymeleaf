@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="tete(titre)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titre} + ' — MakerLab USMBA'">MakerLab USMBA</title>
+    <link rel="stylesheet" th:href="@{/css/makerlab.css}">
+</head>
+<body>
+<header th:fragment="entete" class="bandeau">
+    <div class="bandeau-contenu">
+        <a class="marque" th:href="@{/}">
+            <span class="marque-sigle">ML</span>
+            <span class="marque-texte">
+                <strong>MakerLab USMBA</strong>
+                <small>Ateliers et inscriptions</small>
+            </span>
+        </a>
+        <nav class="menu">
+            <a th:href="@{/}">Tableau de bord</a>
+            <a th:href="@{/inscriptions}">Inscriptions</a>
+            <a class="bouton-menu" th:href="@{/inscriptions/nouvelle}">Nouvelle inscription</a>
+        </nav>
+    </div>
+</header>
+
+<footer th:fragment="pied" class="pied">
+    <div class="pied-contenu">
+        <p>MakerLab — Universite Sidi Mohammed Ben Abdellah, Fes</p>
+        <p class="discret">TP 6 : Spring Boot et Thymeleaf — gestion des inscriptions aux ateliers</p>
+    </div>
+</footer>
+</body>
+</html>
