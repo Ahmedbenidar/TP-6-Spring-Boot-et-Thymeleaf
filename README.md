@@ -1,21 +1,5 @@
 # TP 6 — Spring Boot et Thymeleaf
 
-## MakerLab USMBA — gestion des inscriptions aux ateliers
-
-Application web de gestion des inscriptions aux ateliers du **MakerLab de l'Université Sidi Mohammed Ben Abdellah (Fès)**.
-
-Le projet reprend le socle technique demandé dans le TP (Spring Boot, Spring Data JPA, Thymeleaf, Bean Validation, MySQL/MariaDB) mais applique le tout à un domaine différent : au lieu du CRUD générique sur une entité `User`, on gère des **ateliers** (impression 3D, découpe laser, IoT, CAO) et les **participants** inscrits, avec les règles métier qui vont avec.
-
----
-
-## Ce que fait l'application
-
-- **Tableau de bord** (`/`) : indicateurs globaux (nombre d'inscriptions, nombre d'ateliers, places occupées / places totales, nombre d'établissements représentés), tableau d'occupation de chaque atelier avec jauge de remplissage, répartition des inscrits par établissement, et les 5 dernières inscriptions.
-- **Liste des inscriptions** (`/inscriptions`) : tableau complet trié par date d'inscription décroissante, barre de recherche plein texte (nom, prénom, email, établissement) et filtres rapides par atelier affichant le taux d'occupation.
-- **Nouvelle inscription** (`/inscriptions/nouvelle`) : formulaire en français avec validation côté serveur (Bean Validation + `BindingResult`) et messages d'erreur affichés champ par champ.
-- **Annulation** (`POST /inscriptions/{id}/supprimer`) : suppression d'une inscription avec confirmation navigateur, puis message de confirmation.
-
----
 
 ## Données de démonstration
 
@@ -120,67 +104,4 @@ La suppression passe par un formulaire POST (jamais par un lien GET) et une conf
 
 ---
 
-## Choix d'implémentation
 
-- **Architecture en couches** : `modele` (entités JPA), `depot` (interfaces Spring Data), `service` (règles métier et transactions), `controleur` (MVC). Le TP ne demandait que dépôt + contrôleur ; la couche service permet de sortir les règles de gestion du contrôleur.
-- **Deux entités reliées** : `Atelier` et `Participant` sont liés par un `@ManyToOne`, ce qui oblige à traiter une vraie relation (chargement, conversion du formulaire) plutôt qu'un simple tableau plat.
-- **`FetchType.EAGER` sur `Participant.atelier`** : avec `spring.jpa.open-in-view=false`, un proxy `LAZY` touché dans un template Thymeleaf déclenche une `LazyInitializationException`. Le chargement immédiat d'une seule jointure évite le problème sans masquer la conception.
-- **`ConvertisseurAtelier`** : un `Converter<String, Atelier>` déclaré en `@Component` permet d'écrire `th:field="*{atelier}"` dans le `<select>` et de laisser Spring convertir la valeur. Une valeur vide donne `null`, ce qui déclenche proprement le `@NotNull`.
-- **`BindingResult` systématique** : chaque `POST` reçoit un `BindingResult` placé juste après l'objet validé, ce qui garantit que les erreurs de validation sont disponibles dans le modèle.
-- **`novalidate` sur le formulaire** : la validation HTML5 du navigateur aurait bloqué la soumission avant l'appel serveur. Le formulaire est donc marqué `novalidate` pour que ce soient les annotations Bean Validation qui produisent les messages visibles.
-- **Confirmation sans `th:onclick`** : Thymeleaf 3.1 n'autorise que les expressions numériques ou booléennes dans les attributs d'événement. La confirmation d'annulation utilise donc un attribut `data-nom` et un écouteur `submit` en JavaScript.
-- **CSS maison** : aucune dépendance Bootstrap, la feuille `makerlab.css` définit la charte (vert profond et sable) et gère la mise en page responsive.
-
----
-
-## Personnalisation par rapport à l'énoncé
-
-- Domaine métier différent : le TP générique sur une entité `User` est remplacé par la gestion des **ateliers du MakerLab USMBA** et de leurs participants.
-- Package `ma.usmba.ateliers` et artefact `ateliers-makerlab` au lieu de `com.example` / `demo-thymeleaf`.
-- Deux entités avec une relation `@ManyToOne` au lieu d'une entité unique et plate.
-- Couche `service` ajoutée entre les dépôts et le contrôleur.
-- Pas de Lombok : getters, setters et constructeurs sont écrits explicitement pour garder le code lisible sans plugin d'IDE.
-- Trois règles métier absentes de l'énoncé : email unique par participant, capacité maximale de l'atelier, code d'atelier unique.
-- Motif POST-Redirect-GET pour l'ajout et la suppression, avec messages flash.
-- Suppression d'une inscription et tableau de bord : ce sont deux des pistes d'amélioration suggérées en conclusion du TP, elles sont ici implémentées.
-- URLs et libellés entièrement en français (`/inscriptions`, `/inscriptions/nouvelle`, « Prénom », « Établissement »...).
-- Validation renforcée : longueurs minimales et maximales, capacité entre 4 et 60, téléphone au format marocain (`0[5-7]` + 8 chiffres).
-
----
-
-## Structure du projet
-
-```
-tp6_ateliers/
-├── pom.xml
-├── docs/screenshots/                     # captures réelles de l'application
-└── src/main/
-    ├── java/ma/usmba/ateliers/
-    │   ├── AteliersMakerLabApplication.java
-    │   ├── JeuDeDonnees.java             # données de démonstration
-    │   ├── configuration/
-    │   │   └── ConvertisseurAtelier.java
-    │   ├── controleur/
-    │   │   └── InscriptionControleur.java
-    │   ├── depot/
-    │   │   ├── AtelierDepot.java
-    │   │   └── ParticipantDepot.java
-    │   ├── modele/
-    │   │   ├── Atelier.java
-    │   │   └── Participant.java
-    │   └── service/
-    │       ├── AtelierService.java
-    │       └── ParticipantService.java
-    └── resources/
-        ├── application.properties
-        ├── static/css/makerlab.css
-        └── templates/
-            ├── fragments.html
-            ├── tableau-de-bord.html
-            ├── liste-inscriptions.html
-            └── formulaire-inscription.html
-```
-
----
-
-Réalisé dans le cadre du **TP 6 : Spring Boot et Thymeleaf** — Développement Jakarta EE, Université Sidi Mohammed Ben Abdellah, Fès.
